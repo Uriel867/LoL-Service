@@ -1,3 +1,11 @@
+include:
+  - path: infra/airflow/docker-compose.yaml
+    ports:
+      - 8080:8080
+    env_file:
+      - .env.global
+      - infra/airflow/.env
+      
 services:
   api:
     build: api/
@@ -32,12 +40,12 @@ services:
     build: infra/mongodb
     ports:
       - "27017:27017"
-    # volumes:
-      # - ./data/db:/data/db
     env_file:
       - .env.global
     networks:
       - lol_api_network
+    volumes: 
+      - mongodb_data:/data/db
 
   postgres:
     build: infra/postgres
@@ -48,6 +56,22 @@ services:
       - ./infra/postgres/.env
     networks:
       - lol_api_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data: 
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: infra/data/postgres
+  mongodb_data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: infra/data/mongodb
 
 networks:
   lol_api_network:
